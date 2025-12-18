@@ -1,0 +1,159 @@
+import { useEffect, useState } from "react";
+import api from "../../api/axios";
+import type { Task } from "../../types/task";
+
+type User = {
+  id: number;
+  name: string;
+  email: string;
+};
+
+type Props = {
+  task: Task;
+  onClose: () => void;
+  onUpdated: () => void;
+};
+
+const TaskDetailPanel = ({ task, onClose, onUpdated }: Props) => {
+  const [title, setTitle] = useState(task.title);
+  const [description, setDescription] = useState(task.description ?? "");
+  const [priority, setPriority] = useState(task.priority);
+  const [dueDate, setDueDate] = useState(
+    task.dueDate ? task.dueDate.split("T")[0] : ""
+  );
+
+  const [assignedToId, setAssignedToId] = useState(
+    task.assignedToId ?? task.creatorId
+  );
+
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  /* ------------ Load Users ------------ */
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const res = await api.get("/users");
+        setUsers(res.data);
+      } catch (err) {
+        console.error("Failed to load users", err);
+      }
+    };
+
+    loadUsers();
+  }, []);
+
+  /* ------------ SAVE ------------ */
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+
+      await api.put(`/tasks/${task.id}`, {
+        title,
+        description,
+        priority,
+        assignedToId,
+        dueDate: dueDate ? new Date(dueDate).toISOString() : null,
+      });
+
+      onUpdated();
+      onClose();
+    } catch (err) {
+      console.error("Update failed", err);
+      alert("Failed to update task");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* ------------ DELETE ------------ */
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this task?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await api.delete(`/tasks/${task.id}`);
+      onUpdated();
+      onClose();
+    } catch (err) {
+      console.error("Delete failed", err);
+      alert("Failed to delete task");
+    }
+  };
+
+  return (
+    <div className="w-[340px] bg-white border rounded-lg p-4 h-fit">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="font-semibold text-lg">Task details</h2>
+        <button onClick={onClose} className="text-gray-400">✕</button>
+      </div>
+
+      <div className="space-y-3 text-sm">
+
+        <input
+          className="w-full border rounded-md px-3 py-2"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+
+        <textarea
+          className="w-full border rounded-md px-3 py-2"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+
+        <select
+          className="w-full border rounded-md px-3 py-2"
+          value={priority}
+          onChange={(e) => setPriority(e.target.value)}
+        >
+          <option value="LOW">Low</option>
+          <option value="MEDIUM">Medium</option>
+          <option value="HIGH">High</option>
+          <option value="URGENT">Urgent</option>
+        </select>
+
+        <input
+          type="date"
+          className="w-full border rounded-md px-3 py-2"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+        />
+
+        <select
+          className="w-full border rounded-md px-3 py-2"
+          value={assignedToId}
+          onChange={(e) => setAssignedToId(Number(e.target.value))}
+        >
+          {users.map((u) => (
+            <option key={u.id} value={u.id}>
+              {u.name} ({u.email})
+            </option>
+          ))}
+        </select>
+
+        {/* SAVE */}
+        <button
+          onClick={handleSave}
+          disabled={loading}
+          className="w-full bg-green-600 text-white py-2 rounded-md"
+        >
+          Save changes
+        </button>
+
+        {/* DELETE BUTTON 🔥 */}
+        <button
+          onClick={handleDelete}
+          className="w-full bg-red-600 text-white py-2 rounded-md"
+        >
+          Delete Task
+        </button>
+
+      </div>
+    </div>
+  );
+};
+
+export default TaskDetailPanel;
