@@ -3,6 +3,7 @@ import AuthLayout from "../components/AuthLayout";
 import { useAuth } from "../context/AuthContext";
 import { useState } from "react";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import api from "../api/axios";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -13,38 +14,26 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
 
-    try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // IMPORTANT for cookies (JWT)
-        body: JSON.stringify({ email, password }),
-      });
 
-      const data = await res.json();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
 
-      if (!res.ok) {
-        alert(data.message || "Login failed");
-        setLoading(false);
-        return;
-      }
+  try {
+    const res = await api.post("/auth/login", {
+      email,
+      password,
+    });
 
-      // update auth state (frontend)
-      login(data.user);
-
-      navigate("/dashboard");
-    } catch (err) {
-      alert("Server error. Try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    login(res.data.user);
+    navigate("/dashboard");
+  } catch (err: any) {
+    alert(err?.response?.data?.message || "Login failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <AuthLayout

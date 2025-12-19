@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import api from "../api/axios";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -29,53 +30,40 @@ export default function Register() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (name.trim().length < 3) {
-      alert("Name should be at least 3 characters 😄");
-      return;
-    }
+  if (name.trim().length < 3) {
+    alert("Name should be at least 3 characters 😄");
+    return;
+  }
 
-    if (!email.includes("@")) {
-      alert("Enter a valid email please 🙂");
-      return;
-    }
+  if (!email.includes("@")) {
+    alert("Enter a valid email please 🙂");
+    return;
+  }
 
-    if (!validatePassword(password)) {
-      alert("Password is too weak 😅 Please make it stronger.");
-      return;
-    }
+  if (!validatePassword(password)) {
+    alert("Password is too weak 😅 Please make it stronger.");
+    return;
+  }
 
-    setLoading(true);
+  setLoading(true);
 
-    try {
-      const res = await fetch("http://localhost:5000/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-        }),
-      });
+  try {
+     await api.post("/auth/register", {
+      name,
+      email,
+      password,
+    });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.message || "Registration failed");
-        return;
-      }
-
-      alert("Registration successful 🎉 Please login.");
-      navigate("/login");
-    } catch (err) {
-      alert("Something went wrong 😥 Try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    alert("Registration successful 🎉 Please login.");
+    navigate("/login");
+  } catch (err: any) {
+    alert(err?.response?.data?.message || "Registration failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <AuthLayout
