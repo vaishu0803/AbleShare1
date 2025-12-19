@@ -64,11 +64,25 @@ createTask: async (req: Request, res: Response) => {
       });
     }
 
-    const validated = UpdateTaskDto.parse(req.body);
+    let body = { ...req.body };
 
-    if (validated.dueDate) {
-      validated.dueDate = new Date(validated.dueDate) as any;
+    // ⭐ If status is empty string → remove it so Prisma won't complain
+    if (body.status === "" || body.status === null) {
+      delete body.status;
     }
+
+    // ⭐ If assignedToId comes empty → set it null (optional field)
+    if (body.assignedToId === "" || body.assignedToId === null) {
+      body.assignedToId = null;
+    }
+
+    // ⭐ Convert date properly only if present
+    if (body.dueDate) {
+      body.dueDate = new Date(body.dueDate);
+    }
+
+    // Validate after cleaning
+    const validated = UpdateTaskDto.parse(body);
 
     const task = await TaskService.update(taskId, validated);
 
@@ -102,7 +116,6 @@ createTask: async (req: Request, res: Response) => {
 },
 
 
-
   search: async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -122,15 +135,37 @@ createTask: async (req: Request, res: Response) => {
 
   /* ================= DELETE TASK ================= */
   deleteTask: async (req: Request, res: Response) => {
-    try {
-      const taskId = Number(req.params.id);
-
-      await TaskService.remove(taskId);
-
-      res.json({ message: "Task deleted" });
-    } catch (err) {
-      console.error("Delete Task Failed", err);
-      res.status(500).json({ message: "Failed to delete task" });
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized user",
+      });
     }
-  },
+
+    const taskId = Number(req.params.id);
+
+    const deleted = await TaskService.remove(taskId);
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: "Task deleted successfully",
+    });
+  } catch (err) {
+    console.error("Delete Task Failed", err);
+
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+},
+
 };
