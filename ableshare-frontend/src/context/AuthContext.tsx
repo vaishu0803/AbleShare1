@@ -30,8 +30,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 useEffect(() => {
   const fetchMe = async () => {
     try {
+      const token = localStorage.getItem("ableshare_token");
+
+      if (!token) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
       const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/me`, {
-        credentials: "include",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!res.ok) {
@@ -40,13 +50,9 @@ useEffect(() => {
       }
 
       const data = await res.json();
-
-      if (data.user) {
-        setUser(data.user);
-      } else {
-        setUser(null);
-      }
-    } catch (err) {
+      if (data.user) setUser(data.user);
+      else setUser(null);
+    } catch {
       setUser(null);
     } finally {
       setLoading(false);
@@ -57,11 +63,13 @@ useEffect(() => {
 }, []);
 
 
+
   const login = (userData: User) => {
     setUser(userData);
   };
 
-  const logout = async () => {
+ const logout = async () => {
+  localStorage.removeItem("ableshare_token");
   await fetch(`${import.meta.env.VITE_API_URL}/auth/logout`, {
     credentials: "include",
   });

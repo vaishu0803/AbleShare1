@@ -20,19 +20,28 @@ const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   setLoading(true);
 
-  try {
-    const res = await api.post("/auth/login", {
-      email,
-      password,
-    });
+ try {
+  const res = await api.post("/auth/login", {
+    email,
+    password,
+  });
 
-    login(res.data.user);
-    navigate("/dashboard");
-  } catch (err: any) {
-    alert(err?.response?.data?.message || "Login failed");
-  } finally {
-    setLoading(false);
+  // ⛔ If backend didn’t return token yet we will fix backend later
+  if (!res.data?.token) {
+    alert("Login failed. No token received.");
+    return;
   }
+
+  // ⭐ SAVE TOKEN
+  localStorage.setItem("ableshare_token", res.data.token);
+
+  alert("Login successful 🎉");
+  login(res.data.user);
+  navigate("/dashboard");
+} catch (err: any) {
+  alert(err?.response?.data?.message || "Login failed");
+}
+
 };
 
   return (
