@@ -133,14 +133,6 @@ AbleShare
     │   └── layout
 
 ⚙️ Environment Setup
-Backend .env
-DATABASE_URL=postgresql://user:password@localhost:5432/ableshare
-JWT_SECRET=your_secret
-CLIENT_URL=http://localhost:5173
-PORT=5000
-
-Frontend .env
-VITE_API_URL=http://localhost:5000
 
 ▶️ Running the Project
 1️⃣ Backend
