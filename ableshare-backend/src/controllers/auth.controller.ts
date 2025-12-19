@@ -40,8 +40,10 @@ export const register = async (req: Request, res: Response) => {
       user,
     });
   } catch (err) {
-    return res.status(500).json({ message: "Server error" });
-  }
+  console.error("REGISTER ERROR:", err);
+  return res.status(500).json({ message: "Server error" });
+}
+
 };
 
 // ================= LOGIN =================
@@ -83,9 +85,11 @@ export const login = async (req: Request, res: Response) => {
         email: user.email,
       },
     });
-  } catch (err) {
-    return res.status(500).json({ message: "Server error" });
-  }
+ } catch (err) {
+  console.error("LOGIN ERROR:", err);
+  return res.status(500).json({ message: "Server error" });
+}
+
 };
 
 // ================= GET ME =================
