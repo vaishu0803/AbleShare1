@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
 import type { Task } from "../../types/task";
+import toast from "react-hot-toast";
+
 
 type User = {
   id: number;
@@ -44,27 +46,30 @@ const TaskDetailPanel = ({ task, onClose, onUpdated }: Props) => {
   }, []);
 
   /* ------------ SAVE ------------ */
-  const handleSave = async () => {
-    try {
-      setLoading(true);
+ 
+   const handleSave = async () => {
+  try {
+    setLoading(true);
 
-      await api.put(`/tasks/${task.id}`, {
-        title,
-        description,
-        priority,
-        assignedToId,
-        dueDate: dueDate ? new Date(dueDate).toISOString() : null,
-      });
+    await api.put(`/tasks/${task.id}`, {
+      title,
+      description,
+      status,
+      priority,
+      dueDate,
+      assignedToId: task.assignedToId,
+    });
 
-      onUpdated();
-      onClose();
-    } catch (err) {
-      console.error("Update failed", err);
-      alert("Failed to update task");
-    } finally {
-      setLoading(false);
-    }
-  };
+    toast.success("Task updated successfully");
+    onUpdated();
+    onClose();
+  } catch {
+    toast.error("Failed to update task");
+  } finally {
+    setLoading(false);
+  }
+};
+  
 
   /* ------------ DELETE ------------ */
   const handleDelete = async () => {
@@ -74,13 +79,14 @@ const TaskDetailPanel = ({ task, onClose, onUpdated }: Props) => {
     if (!confirmDelete) return;
 
     try {
-      await api.delete(`/tasks/${task.id}`);
-      onUpdated();
-      onClose();
-    } catch (err) {
-      console.error("Delete failed", err);
-      alert("Failed to delete task");
-    }
+  await api.delete(`/tasks/${task.id}`);
+  toast.success("Task deleted");
+  onUpdated();
+  onClose();
+} catch {
+  toast.error("Failed to delete task");
+}
+
   };
 
   return (

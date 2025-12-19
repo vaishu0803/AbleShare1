@@ -11,9 +11,41 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+
+  const validatePassword = (pwd: string) => {
+    const regex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-={}[\]|:;"'<>,.?/~`]).{8,}$/;
+
+    if (!regex.test(pwd)) {
+      setPasswordError(
+        "Password must be 8+ chars, include uppercase, lowercase, number & special symbol."
+      );
+      return false;
+    }
+
+    setPasswordError("");
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (name.trim().length < 3) {
+      alert("Name should be at least 3 characters 😄");
+      return;
+    }
+
+    if (!email.includes("@")) {
+      alert("Enter a valid email please 🙂");
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      alert("Password is too weak 😅 Please make it stronger.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -36,12 +68,10 @@ export default function Register() {
         return;
       }
 
-      // ✅ SUCCESS → redirect to login
-      alert("Registration successful. Please login.");
+      alert("Registration successful 🎉 Please login.");
       navigate("/login");
-
     } catch (err) {
-      alert("Something went wrong");
+      alert("Something went wrong 😥 Try again.");
     } finally {
       setLoading(false);
     }
@@ -76,10 +106,14 @@ export default function Register() {
             type={showPassword ? "text" : "password"}
             placeholder="Password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              validatePassword(e.target.value);
+            }}
             required
             className="w-full border rounded-md px-3 py-2 pr-10 focus:ring-2 focus:ring-indigo-500"
           />
+
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
@@ -93,19 +127,22 @@ export default function Register() {
           </button>
         </div>
 
+        {passwordError && (
+          <p className="text-red-600 text-sm mt-1">{passwordError}</p>
+        )}
+
         <button
           type="submit"
           disabled={loading}
           className=" w-full  bg-green-600 hover:bg-green-700   text-white   py-2 rounded-lg   transition "
->
-        
+        >
           {loading ? "Creating account..." : "Register"}
         </button>
       </form>
 
       <p className="text-sm text-center mt-6">
         Already have an account?{" "}
-        <Link to="/login"  className="text-green-600  font-medium">
+        <Link to="/login" className="text-green-600 font-medium">
           Login
         </Link>
       </p>

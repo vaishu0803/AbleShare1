@@ -62,7 +62,7 @@ export const TaskRepository = {
     where: {
       assignedToId: userId,
       status: {
-        not: Status.COMPLETED, // 🔥 THIS LINE
+        not: Status.COMPLETED, 
       },
     },
     orderBy: { dueDate: "asc" },
@@ -102,11 +102,18 @@ export const TaskRepository = {
     });
   },
 
-    getById: async (id: number) => {
-    return prisma.task.findUnique({
-      where: { id },
-    });
-  },
+   getById: async (id: number) => {
+  return prisma.task.findUnique({
+    where: { id },
+  });
+},
+
+// REQUIRED FOR SERVICE 
+getTaskById: async (id: number) => {
+  return prisma.task.findUnique({
+    where: { id },
+  });
+},
 
   // =========================
   // UPDATE TASK
@@ -121,6 +128,42 @@ export const TaskRepository = {
       },
     });
   },
+
+
+  searchTasks: async (userId: number, query: string) => {
+  return prisma.task.findMany({
+    where: {
+      AND: [
+        {
+          OR: [
+            { title: { contains: query, mode: "insensitive" } },
+            { description: { contains: query, mode: "insensitive" } },
+          ],
+        },
+        {
+          OR: [
+            { assignedToId: userId },
+            { creatorId: userId },
+          ],
+        },
+      ],
+    },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      priority: true,
+
+      creatorId: true,
+      assignedToId: true,
+
+      creator: { select: { id: true, name: true } },
+      assignedTo: { select: { id: true, name: true } },
+    },
+  });
+},
+
 
   // =========================
   // DELETE TASK

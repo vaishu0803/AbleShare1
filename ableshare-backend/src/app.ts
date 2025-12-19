@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes";
 import taskRoutes from "./routes/task.routes";
+import usersRoutes from "./routes/users.routes";
 
 
 
@@ -18,7 +19,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
-
+app.use("/api/users", usersRoutes);
 
 
 export default app;

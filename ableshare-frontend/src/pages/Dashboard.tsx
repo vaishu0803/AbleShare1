@@ -1,9 +1,7 @@
-import { useEffect, useState } from "react";
 import StatCard from "../components/dashboard/StatCard";
 import PriorityTasks from "../components/dashboard/PriorityTasks";
 import AddTaskModal from "../components/tasks/AddTaskModal";
 import { socket } from "../socket";
-
 
 import {
   ListTodo,
@@ -12,56 +10,59 @@ import {
   Clock,
 } from "lucide-react";
 
-import { fetchTasks } from "../api/tasks";
+import api from "../api/axios";
 import type { Task } from "../types/task";
 
+import {
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+
+import { useState, useEffect } from "react";
+
+/* ---------- FETCH ---------- */
+const fetchTasks = async (): Promise<Task[]> => {
+  const res = await api.get("/tasks");
+  return res.data;
+};
+
 const Dashboard = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
-  // ✅ SINGLE source of truth
-  const loadTasks = async () => {
-    setLoading(true);
-    try {
-      const data = await fetchTasks();
-      setTasks(data);
-    } catch (err) {
-      console.error("Failed to load tasks", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  /* ---------- REACT QUERY ---------- */
+  const { data: tasks = [], isLoading } = useQuery({
+    queryKey: ["tasks", "all"],
+    queryFn: fetchTasks,
+  });
 
-  // fetch on page load
+  /* ---------- SOCKET LIVE UPDATES ---------- */
   useEffect(() => {
-    loadTasks();
-  }, []);
-useEffect(() => {
-  socket.on("task:created", loadTasks);
-  socket.on("task:updated", loadTasks);
-  socket.on("task:deleted", loadTasks);
+    const invalidate = () =>
+      queryClient.invalidateQueries({ queryKey: ["tasks", "all"] });
 
-  return () => {
-    socket.off("task:created", loadTasks);
-    socket.off("task:updated", loadTasks);
-    socket.off("task:deleted", loadTasks);
-  };
-}, []);
+    socket.on("task:created", invalidate);
+    socket.on("task:updated", invalidate);
+    socket.on("task:deleted", invalidate);
 
-  // derived stats
+    return () => {
+      socket.off("task:created", invalidate);
+      socket.off("task:updated", invalidate);
+      socket.off("task:deleted", invalidate);
+    };
+  }, [queryClient]);
+
+  /* ---------- STATS ---------- */
   const total = tasks.length;
   const highPriority = tasks.filter(t => t.priority === "HIGH").length;
   const completed = tasks.filter(t => t.status === "COMPLETED").length;
- const now = new Date();
 
-const overdue = tasks.filter(task => {
-  if (!task.dueDate) return false;
-
-  const due = new Date(task.dueDate);
-  return due < now && task.status !== "COMPLETED";
-}).length;
-
+  const now = new Date();
+  const overdue = tasks.filter(task => {
+    if (!task.dueDate) return false;
+    const due = new Date(task.dueDate);
+    return due < now && task.status !== "COMPLETED";
+  }).length;
 
   return (
     <div className="bg-gray-100 min-h-screen rounded-2xl">
@@ -88,18 +89,40 @@ const overdue = tasks.filter(task => {
 
         {/* STATS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          <StatCard title="Total Tasks" value={loading ? "-" : String(total)} icon={ListTodo} />
-          <StatCard title="High Priority" value={loading ? "-" : String(highPriority)} icon={Star} />
-          <StatCard title="Completed Tasks" value={loading ? "-" : String(completed)} icon={CheckCircle} />
-          <StatCard title="Overdue Tasks" value={loading ? "-" : String(overdue)} icon={Clock} />
+          <StatCard title="Total Tasks" value ={
+  isLoading ? (
+    <div className="h-5 w-10 bg-gray-300 rounded animate-pulse"></div>
+  ) : (
+    String(total)
+  )
+}
+ icon={ListTodo} />
+          <StatCard title="High Priority" value ={
+  isLoading ? (
+    <div className="h-5 w-10 bg-gray-300 rounded animate-pulse"></div>
+  ) : (
+    String(highPriority)
+  )
+} icon={Star} />
+          <StatCard title="Completed Tasks" value ={
+  isLoading ? (
+    <div className="h-5 w-10 bg-gray-300 rounded animate-pulse"></div>
+  ) : (
+    String(completed)
+  )
+} icon={CheckCircle} />
+          <StatCard title="Overdue Tasks" value ={
+  isLoading ? (
+    <div className="h-5 w-10 bg-gray-300 rounded animate-pulse"></div>
+  ) : (
+    String(overdue)
+  )
+} icon={Clock} />
         </div>
 
         {/* MAIN GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-         
-
           <PriorityTasks tasks={tasks} />
-
         </div>
       </div>
 
@@ -109,7 +132,7 @@ const overdue = tasks.filter(task => {
         onClose={() => setOpen(false)}
         onCreated={() => {
           setOpen(false);
-          loadTasks(); // 🔥 THIS IS THE FIX
+          queryClient.invalidateQueries({ queryKey: ["tasks", "all"] });
         }}
       />
     </div>

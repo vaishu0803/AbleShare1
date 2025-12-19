@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Toaster, toast } from "react-hot-toast";
 
+
+
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -18,31 +20,39 @@ function App() {
  useEffect(() => {
   if (!isAuthenticated || !user) return;
 
-  const handleNotification = (data: any) => {
-    // 🔔 ASSIGNED
-    if (
-      data.action === "ASSIGNED" &&
-      data.assignedToId === user.id
-    ) {
-      toast.success(`🔔 New task assigned to you: ${data.title}`);
-    }
+  // ✅ Join user-specific room
+  socket.emit("join-user", user.id);
+  console.log("Joined user room:", user.id);
 
-    // ✏️ UPDATED
-    if (
-      data.action === "UPDATED" &&
-      (data.assignedToId === user.id ||
-        data.creatorId === user.id)
-    ) {
-      toast(` Task updated: ${data.title}`);
-    }
+  // ===================== LISTENERS ======================
+  const handleCreated = (task: any) => {
+    if (task.assignedToId !== user.id) return;
+    toast.success(`🆕 New task assigned: ${task.title}`);
   };
 
-  // attach listener
-  socket.on("task:notification", handleNotification);
+  const handleUpdated = (task: any) => {
+    if (task.assignedToId !== user.id) return;
+    toast(` Task updated: ${task.title}`);
+  };
 
-  //  CLEANUP (THIS IS REQUIRED)
+  const handleDeleted = () => {
+    toast(`🗑️ Task deleted`);
+  };
+
+  const handleStatusChanged = (data: any) => {
+    toast.success(`🚀 "${data.title}" moved ${data.from} → ${data.to}`);
+  };
+
+  socket.on("task:created", handleCreated);
+  socket.on("task:updated", handleUpdated);
+  socket.on("task:deleted", handleDeleted);
+  socket.on("task:status-changed", handleStatusChanged);
+
   return () => {
-    socket.off("task:notification", handleNotification);
+    socket.off("task:created", handleCreated);
+    socket.off("task:updated", handleUpdated);
+    socket.off("task:deleted", handleDeleted);
+    socket.off("task:status-changed", handleStatusChanged);
   };
 }, [isAuthenticated, user]);
 
@@ -84,6 +94,7 @@ function App() {
             path="/created"
             element={isAuthenticated ? <CreatedByMe /> : <Navigate to="/login" />}
           />
+        
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </BrowserRouter>

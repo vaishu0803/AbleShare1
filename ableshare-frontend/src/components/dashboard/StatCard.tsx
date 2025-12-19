@@ -1,8 +1,10 @@
-interface StatCardProps {
+import  type { ReactNode } from "react";
+
+type StatCardProps = {
   title: string;
-  value: string | number;
+  value: ReactNode;   // <-- This works in TSX
   icon: React.ElementType;
-}
+};
 
 
 const StatCard = ({ title, value, icon: Icon }: StatCardProps) => {
