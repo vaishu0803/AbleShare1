@@ -27,47 +27,47 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   // ✅ Restore session on refresh
-  useEffect(() => {
-    const fetchMe = async () => {
-      try {
-        const res = await fetch("http://localhost:5000/api/auth/me", {
-          credentials: "include",
-        });
+useEffect(() => {
+  const fetchMe = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/me`, {
+        credentials: "include",
+      });
 
-        if (!res.ok) {
-          setUser(null);
-          return;
-        }
-
-        const data = await res.json();
-
-        // 🔥 IMPORTANT: handle BOTH response shapes
-        if (data.user) {
-          setUser(data.user);
-        } else if (data.id) {
-          // backend returns only id → user not fully loaded
-          setUser(null);
-        }
-      } catch (err) {
+      if (!res.ok) {
         setUser(null);
-      } finally {
-        setLoading(false);
+        return;
       }
-    };
 
-    fetchMe();
-  }, []);
+      const data = await res.json();
+
+      if (data.user) {
+        setUser(data.user);
+      } else {
+        setUser(null);
+      }
+    } catch (err) {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchMe();
+}, []);
+
 
   const login = (userData: User) => {
     setUser(userData);
   };
 
   const logout = async () => {
-    await fetch("http://localhost:5000/api/auth/logout", {
-      credentials: "include",
-    });
-    setUser(null);
-  };
+  await fetch(`${import.meta.env.VITE_API_URL}/auth/logout`, {
+    credentials: "include",
+  });
+  setUser(null);
+};
+
 
   return (
     <AuthContext.Provider
