@@ -45,27 +45,34 @@ const TaskDetailPanel = ({ task, onClose, onUpdated }: Props) => {
   }, []);
 
   /* ------------ SAVE ------------ */
-  const handleSave = async () => {
-    try {
-      setLoading(true);
+ const handleSave = async () => {
+  try {
+    setLoading(true);
 
-      await api.put(`/tasks/${task.id}`, {
-        title,
-        description,
-        priority,
-        dueDate,
-        assignedToId,
-      });
+    const formattedDueDate =
+      dueDate && dueDate.includes("-")
+        ? new Date(dueDate).toISOString().split("T")[0]
+        : null;
 
-      toast.success("Task updated successfully");
-      onUpdated();
-      onClose();
-    } catch {
-      toast.error("Failed to update task");
-    } finally {
-      setLoading(false);
-    }
-  };
+    await api.put(`/tasks/${task.id}`, {
+      title,
+      description,
+      priority,
+      status: task.status,   // keep existing status safely
+      dueDate: formattedDueDate,
+      assignedToId,
+    });
+
+    toast.success("Task updated successfully");
+    onUpdated();
+    onClose();
+  } catch {
+    toast.error("Failed to update task");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   /* ------------ DELETE ------------ */
   const handleDelete = async () => {
