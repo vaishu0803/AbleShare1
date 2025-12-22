@@ -3,7 +3,6 @@ import api from "../../api/axios";
 import type { Task } from "../../types/task";
 import toast from "react-hot-toast";
 
-
 type User = {
   id: number;
   name: string;
@@ -46,30 +45,27 @@ const TaskDetailPanel = ({ task, onClose, onUpdated }: Props) => {
   }, []);
 
   /* ------------ SAVE ------------ */
- 
-   const handleSave = async () => {
-  try {
-    setLoading(true);
+  const handleSave = async () => {
+    try {
+      setLoading(true);
 
-    await api.put(`/tasks/${task.id}`, {
-      title,
-      description,
-      status,
-      priority,
-      dueDate,
-      assignedToId: task.assignedToId,
-    });
+      await api.put(`/tasks/${task.id}`, {
+        title,
+        description,
+        priority,
+        dueDate,
+        assignedToId,
+      });
 
-    toast.success("Task updated successfully");
-    onUpdated();
-    onClose();
-  } catch {
-    toast.error("Failed to update task");
-  } finally {
-    setLoading(false);
-  }
-};
-  
+      toast.success("Task updated successfully");
+      onUpdated();
+      onClose();
+    } catch {
+      toast.error("Failed to update task");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   /* ------------ DELETE ------------ */
   const handleDelete = async () => {
@@ -79,25 +75,32 @@ const TaskDetailPanel = ({ task, onClose, onUpdated }: Props) => {
     if (!confirmDelete) return;
 
     try {
-  await api.delete(`/tasks/${task.id}`);
-  toast.success("Task deleted");
-  onUpdated();
-  onClose();
-} catch {
-  toast.error("Failed to delete task");
-}
-
+      await api.delete(`/tasks/${task.id}`);
+      toast.success("Task deleted");
+      onUpdated();
+      onClose();
+    } catch {
+      toast.error("Failed to delete task");
+    }
   };
 
   return (
-    <div className="w-[340px] bg-white border rounded-lg p-4 h-fit">
+    <div
+      className="
+        bg-white border rounded-lg p-4 
+        w-full max-w-sm        /* responsive width */
+        mx-auto lg:mx-0        /* center only on mobile */
+        h-fit
+      "
+    >
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-semibold text-lg">Task details</h2>
-        <button onClick={onClose} className="text-gray-400">✕</button>
+        <button onClick={onClose} className="text-gray-400">
+          ✕
+        </button>
       </div>
 
       <div className="space-y-3 text-sm">
-
         <input
           className="w-full border rounded-md px-3 py-2"
           value={title}
@@ -144,27 +147,28 @@ const TaskDetailPanel = ({ task, onClose, onUpdated }: Props) => {
         <button
           onClick={handleSave}
           disabled={loading}
-           className="
-    bg-green-600 text-white font-medium rounded-md
-    w-full sm:w-auto
-    text-sm sm:text-base
-    py-2 sm:py-2.5
-  "     >
+          className="
+            bg-green-600 text-white font-medium rounded-md
+            w-full sm:w-auto
+            text-sm sm:text-base
+            py-2 sm:py-2.5
+          "
+        >
           Save changes
         </button>
 
-        {/* DELETE BUTTON 🔥 */}
+        {/* DELETE */}
         <button
           onClick={handleDelete}
           className="
-    bg-red-600 text-white font-medium rounded-md
-    w-full sm:w-auto
-    text-sm sm:text-base
-    py-2 sm:py-2.5
-  "  >
+            bg-red-600 text-white font-medium rounded-md
+            w-full sm:w-auto
+            text-sm sm:text-base
+            py-2 sm:py-2.5
+          "
+        >
           Delete Task
         </button>
-
       </div>
     </div>
   );
