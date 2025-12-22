@@ -67,11 +67,8 @@ const Topbar = () => {
   const handleSelect = (task: SearchTask) => {
     if (!user) return;
 
-    if (task.assignedToId === user.id) {
-      navigate(`/assigned?task=${task.id}`);
-    } else {
-      navigate(`/created?task=${task.id}`);
-    }
+    if (task.assignedToId === user.id) navigate(`/assigned?task=${task.id}`);
+    else navigate(`/created?task=${task.id}`);
 
     setShowResults(false);
     setQuery("");
@@ -88,12 +85,7 @@ const Topbar = () => {
             onChange={(e) => handleSearch(e.target.value)}
             onFocus={() => query && setShowResults(true)}
             placeholder="Search tasks globally..."
-            className="
-              w-full 
-              border rounded-full px-4 py-2 
-              outline-none 
-              focus:ring-2 focus:ring-green-500
-            "
+            className="w-full border rounded-full px-4 py-2 outline-none focus:ring-2 focus:ring-green-500"
           />
 
           {/* RESULTS */}
@@ -101,9 +93,10 @@ const Topbar = () => {
             <div
               className="
                 absolute z-50 top-12
-                left-0 right-0 mx-auto w-[92vw]
-                sm:w-[450px] sm:left-0 sm:right-auto
-                bg-white shadow-xl rounded-xl border 
+                left-0
+                w-full
+                sm:w-[450px]
+                bg-white shadow-xl rounded-xl border
                 max-h-80 overflow-y-auto
               "
             >
@@ -149,9 +142,7 @@ const Topbar = () => {
         </div>
 
         {/* PROFILE */}
-        <div className="flex-shrink-0">
-          <ProfileMenu />
-        </div>
+        <ProfileMenu />
       </div>
     </header>
   );
