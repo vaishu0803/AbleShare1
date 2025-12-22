@@ -69,23 +69,35 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto space-y-6 px-4 xl:px-6 py-6">
 
         {/* HEADER */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">
-              Dashboard
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Overview of your tasks
-            </p>
-          </div>
+       <div className="
+  flex flex-col sm:flex-row 
+  sm:items-center sm:justify-between 
+  gap-3
+">
+  <div>
+    <h1 className="text-2xl font-semibold text-gray-900">
+      Dashboard
+    </h1>
+    <p className="text-sm text-gray-500 mt-1">
+      Overview of your tasks
+    </p>
+  </div>
 
-          <button
-            onClick={() => setOpen(true)}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
-          >
-            + Add Task
-          </button>
-        </div>
+  <button
+    onClick={() => setOpen(true)}
+    className="
+      bg-green-600 hover:bg-green-700 
+      text-white 
+      px-4 py-2 
+      rounded-lg 
+      text-sm font-medium 
+      self-start sm:self-auto
+    "
+  >
+    + Add Task
+  </button>
+</div>
+
 
         {/* STATS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
