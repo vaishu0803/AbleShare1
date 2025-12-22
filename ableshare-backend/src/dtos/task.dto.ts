@@ -15,18 +15,13 @@ export const UpdateTaskDto = z.object({
 
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).optional(),
 
+  // Status – truly optional, no empty string drama
   status: z
-    .union([
-      z.enum(["TODO", "IN_PROGRESS", "REVIEW", "COMPLETED"]),
-      z.literal("")
-    ])
-    .optional()
-    .transform(v => (v === "" ? undefined : v)),
+    .enum(["TODO", "IN_PROGRESS", "REVIEW", "COMPLETED"])
+    .optional(),
 
-  dueDate: z
-    .union([z.string(), z.literal(""), z.null()])
-    .optional()
-    .transform(v => (v === "" ? null : v)),
+  // Allow: string | null | undefined
+  dueDate: z.string().nullable().optional(),
 
   assignedToId: z.number().optional(),
 });
