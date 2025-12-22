@@ -66,25 +66,28 @@ createTask: async (req: Request, res: Response) => {
 
     let body = { ...req.body };
 
-    // ⭐ If status is empty string → remove it so Prisma won't complain
+    //  If status is empty string → remove it so Prisma won't complain
     if (body.status === "" || body.status === null) {
       delete body.status;
     }
 
-    // ⭐ If assignedToId comes empty → set it null (optional field)
+    //  If assignedToId comes empty → set it null (optional field)
     if (body.assignedToId === "" || body.assignedToId === null) {
       body.assignedToId = null;
     }
 
-    // ⭐ Convert date properly only if present
-    if (body.dueDate) {
-      body.dueDate = new Date(body.dueDate);
-    }
+  // Validate first (keep dueDate as string/null)
+const validated = UpdateTaskDto.parse(body);
 
-    // Validate after cleaning
-    const validated = UpdateTaskDto.parse(body);
+const payload: any = { ...validated };
 
-    const task = await TaskService.update(taskId, validated);
+if (validated.dueDate) {
+  payload.dueDate = new Date(validated.dueDate);
+}
+
+const task = await TaskService.update(taskId, payload);
+
+
 
     if (!task) {
       return res.status(404).json({
