@@ -1,7 +1,9 @@
 import { NavLink } from "react-router-dom";
-import { Home, List, Star } from "lucide-react";
+import { Home, List, Star ,CheckCircle} from "lucide-react";
 import logo from "../assets/logo3.png";
 import logoCollapsed from "../assets/logo2.png";
+
+
 
 
 const Sidebar: React.FC = () => {
@@ -132,6 +134,29 @@ const Sidebar: React.FC = () => {
               >
                 Created By Me
               </span>
+
+              {/* COMPLETED */}
+<NavLink to="/completed" className={baseClass}>
+  {({ isActive }) => (
+    <>
+      {isActive && (
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-9 w-1 rounded-r-full bg-green-600" />
+      )}
+
+      <CheckCircle
+        size={20}
+        className={isActive ? "text-green-600" : "text-gray-500"}
+      />
+
+      <span className={`hidden sm:block text-[15px] ${
+        isActive ? "text-black font-semibold" : "text-gray-600"
+      }`}>
+        Completed
+      </span>
+    </>
+  )}
+</NavLink>
+
             </>
           )}
         </NavLink>
