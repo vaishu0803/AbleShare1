@@ -108,15 +108,14 @@ const AddTaskModal = ({ open, onClose, onCreated }: AddTaskModalProps) => {
   };
 
   /* ---------------- UI ---------------- */
- return (
-  <>
-    {/* Overlay */}
-    <div className="fixed inset-0 bg-black/30 z-50" />
+  return (
+    <>
+      {/* Overlay */}
+     <div className="fixed inset-0 bg-black/30 z-40" />
 
-    {/* Modal */}
-    <div className="fixed inset-0 flex items-center justify-center z-60">
-      <div className="bg-white rounded-xl w-full max-w-md p-6 space-y-4">
-
+      {/* Modal */}
+     <div className="fixed inset-0 flex items-center justify-center z-50">
+        <div className="bg-white rounded-xl w-full max-w-md p-6 space-y-4">
           <h2 className="text-lg font-semibold">Add Task</h2>
 
           {/* TITLE */}
