@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import AssignedToMe from "./pages/AssignedToMe";
 import CreatedByMe from "./pages/CreatedByMe";
 import DashboardLayout from "./layout/DashboardLayout";
+import Completed from "./pages/Completed";
 
 import { useAuth } from "./context/AuthContext";
 import { socket } from "./socket";
@@ -94,6 +95,8 @@ function App() {
             path="/created"
             element={isAuthenticated ? <CreatedByMe /> : <Navigate to="/login" />}
           />
+          <Route path="/completed" element={<Completed />} />
+
         
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
