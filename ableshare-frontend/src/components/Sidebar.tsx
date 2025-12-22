@@ -8,21 +8,20 @@ const Sidebar: React.FC = () => {
     "relative flex items-center gap-4 px-4 py-3 rounded-lg transition";
 
   return (
-   <aside
+  <aside
   className="
     bg-gray-100
     flex flex-col
     border border-gray-200 shadow-sm
 
-    h-screen w-20
-    sm:w-64 sm:h-[calc(100vh-2rem)]
+    min-h-screen 
+    w-20
+    sm:w-64 sm:min-h-[calc(100vh-2rem)]
 
     m-0 sm:m-4
     rounded-none sm:rounded-2xl
   "
 >
-
-      {/* LOGO */}
      {/* LOGO */}
 <div className="flex items-center justify-center px-4 h-20 border-b border-gray-200">
 {/* Expanded logo */}
