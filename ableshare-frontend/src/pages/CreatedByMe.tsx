@@ -140,7 +140,15 @@ const CreatedByMe = () => {
           </div>
 
           {/* MAIN SECTION */}
-          <div className="flex gap-6 pb-6 h-[calc(100vh-140px)]">
+          <div className="
+  flex pb-6 
+  gap-4
+  flex-col           /* mobile = vertical */
+  lg:flex-row        /* desktop = side by side */
+  h-auto lg:h-[calc(100vh-140px)]
+  overflow-hidden
+">
+
 
             {/* LEFT LIST */}
             <div className="flex-1 overflow-y-auto pr-2">
@@ -149,11 +157,16 @@ const CreatedByMe = () => {
                 <h1 className="text-xl font-semibold">Created By Me</h1>
 
                 <button
-                  onClick={() => setOpenCreate(true)}
-                  className="bg-green-600 text-white px-4 py-2 rounded-md"
-                >
-                  + Create Task
-                </button>
+  onClick={() => setOpenCreate(true)}
+  className="
+    bg-green-600 text-white rounded-md 
+    text-sm px-3 py-1.5          /* mobile size */
+    sm:text-base sm:px-4 sm:py-2  /* tablet+ normal */
+  "
+>
+  + Create Task
+</button>
+
               </div>
 
               {!loading && visibleTasks.length === 0 && (
@@ -209,7 +222,11 @@ const CreatedByMe = () => {
 
                     {/* MOBILE PANEL */}
                     {selectedTask?.id === task.id && (
-                      <div ref={mobileRef} className="lg:hidden mt-2">
+                      <div
+  ref={mobileRef}
+  className="lg:hidden mt-2 w-full overflow-hidden"
+>
+
                         <TaskDetailPanel
                           task={selectedTask}
                           onClose={() => setSelectedTask(null)}

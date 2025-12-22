@@ -144,16 +144,24 @@ const TaskDetailPanel = ({ task, onClose, onUpdated }: Props) => {
         <button
           onClick={handleSave}
           disabled={loading}
-          className="w-full bg-green-600 text-white py-2 rounded-md"
-        >
+           className="
+    bg-green-600 text-white font-medium rounded-md
+    w-full sm:w-auto
+    text-sm sm:text-base
+    py-2 sm:py-2.5
+  "     >
           Save changes
         </button>
 
         {/* DELETE BUTTON 🔥 */}
         <button
           onClick={handleDelete}
-          className="w-full bg-red-600 text-white py-2 rounded-md"
-        >
+          className="
+    bg-red-600 text-white font-medium rounded-md
+    w-full sm:w-auto
+    text-sm sm:text-base
+    py-2 sm:py-2.5
+  "  >
           Delete Task
         </button>
 
