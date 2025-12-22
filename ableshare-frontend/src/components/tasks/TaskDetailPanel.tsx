@@ -49,16 +49,14 @@ const TaskDetailPanel = ({ task, onClose, onUpdated }: Props) => {
   try {
     setLoading(true);
 
-    const formattedDueDate =
-      dueDate && dueDate.includes("-")
-        ? new Date(dueDate).toISOString().split("T")[0]
-        : null;
+    const formattedDueDate = dueDate
+      ? new Date(dueDate).toISOString()
+      : null;
 
     await api.put(`/tasks/${task.id}`, {
       title,
       description,
       priority,
-      status: task.status,   // keep existing status safely
       dueDate: formattedDueDate,
       assignedToId,
     });
