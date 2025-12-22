@@ -10,7 +10,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 
-
 /* ---------- OVERDUE ---------- */
 const isOverdue = (task: Task) => {
   if (!task.dueDate) return false;
@@ -40,23 +39,23 @@ const AssignedToMe = () => {
   const detailRef = useRef<HTMLDivElement | null>(null);
 
   /* ---------- REACT QUERY ---------- */
-  const { data: tasks = [], isLoading } = useQuery({
-    queryKey: ["tasks", "assigned"],
-    queryFn: async () => {
-      const res = await api.get("/tasks?view=assigned");
-      return res.data;
-    },
-  });
+ const { data: tasks = [], isLoading } = useQuery<Task[]>({
+  queryKey: ["tasks", "assigned"],
+  queryFn: async () => {
+    const res = await api.get("/tasks?view=assigned");
+    return res.data;
+  },
+});
+
 
   /* ---------- SOCKET ---------- */
   useEffect(() => {
     if (!user) return;
 
-    const invalidate = () => {
+    const invalidate = () =>
       queryClient.invalidateQueries({
         queryKey: ["tasks", "assigned"],
       });
-    };
 
     socket.on("task:created", invalidate);
     socket.on("task:updated", invalidate);
@@ -69,7 +68,7 @@ const AssignedToMe = () => {
     };
   }, [user?.id, queryClient]);
 
-  /* ---------- CLICK OUTSIDE ---------- */
+  /* ---------- CLICK OUTSIDE CLOSE ---------- */
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (detailRef.current && !detailRef.current.contains(e.target as Node)) {
@@ -83,28 +82,27 @@ const AssignedToMe = () => {
 
   /* ---------- UPDATE STATUS ---------- */
   const updateStatus = async (taskId: number, status: string) => {
-  try {
-    await api.patch(`/tasks/${taskId}`, { status });
+    try {
+      await api.patch(`/tasks/${taskId}`, { status });
 
-    queryClient.invalidateQueries({
-      queryKey: ["tasks", "assigned"],
-    });
+      queryClient.invalidateQueries({
+        queryKey: ["tasks", "assigned"],
+      });
 
-    toast.success(`Status updated to ${status}`);
+      toast.success(`Status updated to ${status}`);
 
-    if (status === "COMPLETED") setSelectedTask(null);
-  } catch (err) {
-    console.error("Status update failed", err);
-    toast.error("Failed to update status");
-  }
-};
+      if (status === "COMPLETED") setSelectedTask(null);
+    } catch (err) {
+      console.error("Status update failed", err);
+      toast.error("Failed to update status");
+    }
+  };
 
   /* ---------- COMPLETE ---------- */
   const completeTask = async (taskId: number) => {
     try {
       setCompletingId(taskId);
       await updateStatus(taskId, "COMPLETED");
-
       setTimeout(() => setCompletingId(null), 350);
     } catch {
       setCompletingId(null);
@@ -129,21 +127,22 @@ const AssignedToMe = () => {
   /* ---------- OPEN FROM GLOBAL SEARCH ---------- */
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const taskId = params.get("taskId");
+    const taskId = params.get("task");
 
     if (!taskId || !tasks.length) return;
 
-    const found = tasks.map((t: Task) => ({ ...t, overdue: isOverdue(t) }))
+    const found = tasks
+      .map(t => ({ ...t, overdue: isOverdue(t) }))
+      .find(t => t.id === Number(taskId));
 
+    if (!found) return;
 
-    if (found) {
-      setSelectedTask(found);
+    setSelectedTask(found);
 
-      setTimeout(() => {
-        const el = document.getElementById(`task-${found.id}`);
-        el?.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 200);
-    }
+    setTimeout(() => {
+      const el = document.getElementById(`task-${found.id}`);
+      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 200);
   }, [location.search, tasks]);
 
   return (
@@ -153,9 +152,9 @@ const AssignedToMe = () => {
       <div className="flex-1 flex flex-col">
         <Topbar />
 
-        <div className="flex flex-col gap-4 px-4 sm:px-6 py-6 lg:gap-6">
+        <div className="flex flex-col gap-4 sm:px-6 px-4 py-6">
           {/* FILTER BAR */}
-          <div className="flex flex-wrap gap-4 lg:gap-6 items-center">
+          <div className="flex flex-wrap gap-4 items-center">
             <select
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
@@ -206,24 +205,22 @@ const AssignedToMe = () => {
                 </div>
               )}
 
-             {isLoading && (
-  <div className="space-y-3 mt-4">
-    {Array.from({ length: 6 }).map((_, i) => (
-      <div
-        key={i}
-        className="animate-pulse flex items-center gap-3 bg-white rounded-md px-3 py-3 border"
-      >
-        <div className="w-5 h-5 rounded-full bg-gray-300" />
-
-        <div className="flex-1">
-          <div className="h-3 w-40 bg-gray-300 rounded mb-2"></div>
-          <div className="h-2 w-20 bg-gray-200 rounded"></div>
-        </div>
-      </div>
-    ))}
-  </div>
-)}
-
+              {isLoading && (
+                <div className="space-y-3 mt-4">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="animate-pulse flex items-center gap-3 bg-white rounded-md px-3 py-3 border"
+                    >
+                      <div className="w-5 h-5 rounded-full bg-gray-300" />
+                      <div className="flex-1">
+                        <div className="h-3 w-40 bg-gray-300 rounded mb-2"></div>
+                        <div className="h-2 w-20 bg-gray-200 rounded"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <div className="space-y-2">
                 {visibleTasks.map(task => (
@@ -232,8 +229,7 @@ const AssignedToMe = () => {
                     key={task.id}
                     onClick={() => setSelectedTask(task)}
                     className={`
-                      flex items-center gap-3 bg-white rounded-md px-3 py-2 
-                      cursor-pointer border
+                      flex items-center gap-3 bg-white rounded-md px-3 py-2 cursor-pointer border
                       ${task.overdue ? "border-red-400 bg-red-50" : ""}
                       ${
                         selectedTask?.id === task.id
@@ -263,7 +259,6 @@ const AssignedToMe = () => {
 
                     <div>
                       <p className="text-sm font-medium">{task.title}</p>
-
                       {(task as any).overdue && (
                         <span className="text-xs text-red-600 font-medium">
                           Overdue
@@ -302,7 +297,11 @@ const AssignedToMe = () => {
                       className={`
                         px-3 py-1 text-xs font-medium border rounded-full
                         ${STATUS_COLORS[s]}
-                        ${selectedTask.status === s ? "ring-2 ring-offset-1" : ""}
+                        ${
+                          selectedTask.status === s
+                            ? "ring-2 ring-offset-1"
+                            : ""
+                        }
                       `}
                     >
                       {s.replace("_", " ")}
