@@ -3,6 +3,7 @@ import { Home, List, Star } from "lucide-react";
 import logo from "../assets/logo3.png";
 import logoCollapsed from "../assets/logo2.png";
 
+
 const Sidebar: React.FC = () => {
   const baseClass =
     "relative flex items-center gap-4 px-4 py-3 rounded-lg transition";

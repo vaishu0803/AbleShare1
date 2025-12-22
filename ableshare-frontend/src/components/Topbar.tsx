@@ -9,10 +9,8 @@ interface SearchTask {
   title: string;
   priority: string;
   status: string;
-
   assignedToId?: number;
   creatorId?: number;
-
   assignedTo?: { name: string };
   creator?: { name: string };
 }
@@ -90,7 +88,12 @@ const Topbar = () => {
             onChange={(e) => handleSearch(e.target.value)}
             onFocus={() => query && setShowResults(true)}
             placeholder="Search tasks globally..."
-            className="w-full border rounded-full px-4 py-2 outline-none focus:ring-2 focus:ring-green-500"
+            className="
+              w-full 
+              border rounded-full px-4 py-2 
+              outline-none 
+              focus:ring-2 focus:ring-green-500
+            "
           />
 
           {/* RESULTS */}
@@ -145,9 +148,10 @@ const Topbar = () => {
           )}
         </div>
 
-
         {/* PROFILE */}
-        <ProfileMenu />
+        <div className="flex-shrink-0">
+          <ProfileMenu />
+        </div>
       </div>
     </header>
   );

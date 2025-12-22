@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -6,6 +6,7 @@ const ProfileMenu = () => {
   const [open, setOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   if (!user) return null;
 
@@ -14,30 +15,32 @@ const ProfileMenu = () => {
   )}`;
 
   const handleLogout = async () => {
-    try {
-      await logout();          // 🔥 clear auth state
-      navigate("/login");      // 🔥 redirect to login
-    } catch (err) {
-      console.error("Logout failed", err);
-    }
+    await logout();
+    navigate("/login");
   };
 
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
   return (
-    <div className="relative">
-      {/* Profile button */}
+    <div className="relative" ref={menuRef}>
+      {/* Profile Button */}
       <button
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={() => setOpen(prev => !prev)}
         className="flex items-center gap-3 px-2 py-1 rounded-lg hover:bg-gray-100"
       >
-        {/* Text */}
-       <div className="text-right leading-tight">
-
-          <p className="text-sm font-medium text-gray-900">
-            {user.name}
-          </p>
-          <p className="text-xs text-gray-500">
-            {user.email}
-          </p>
+        {/* Text visible only on sm+ devices */}
+        <div className="hidden sm:block text-right leading-tight">
+          <p className="text-sm font-medium text-gray-900">{user.name}</p>
+          <p className="text-xs text-gray-500">{user.email}</p>
         </div>
 
         {/* Avatar */}
@@ -50,15 +53,18 @@ const ProfileMenu = () => {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-50">
-          <ul className="text-sm py-1">
-            <li
-              onClick={handleLogout}
-              className="px-4 py-2 hover:bg-red-50 cursor-pointer text-red-600"
-            >
-              Logout
-            </li>
-          </ul>
+        <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border z-50 p-3">
+          <div className="pb-3 border-b">
+            <p className="font-semibold">{user.name}</p>
+            <p className="text-xs text-gray-500">{user.email}</p>
+          </div>
+
+          <button
+            onClick={handleLogout}
+            className="w-full text-left px-4 py-2 mt-2 rounded-md text-red-600 hover:bg-red-50"
+          >
+            Logout
+          </button>
         </div>
       )}
     </div>
