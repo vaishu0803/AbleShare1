@@ -5,6 +5,8 @@ import api from "../api/axios";
 import { socket } from "../socket";
 import type { Task } from "../types/task";
 
+import { useAuth } from "../context/AuthContext";
+
 import {
   useQuery,
   useQueryClient
@@ -18,6 +20,7 @@ const fetchTasks = async (): Promise<Task[]> => {
 
 const Completed = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const desktopRef = useRef<HTMLDivElement | null>(null);
   const mobileRef = useRef<HTMLDivElement | null>(null);
@@ -29,6 +32,11 @@ const Completed = () => {
     queryKey: ["tasks", "completed"],
     queryFn: fetchTasks,
   });
+
+  /* ---------- ONLY MY COMPLETED TASKS ---------- */
+  const myCompletedTasks = tasks.filter(
+    t => t.assignedToId === user?.id
+  );
 
   /* ---------- SOCKET LIVE ---------- */
   useEffect(() => {
@@ -106,15 +114,15 @@ const Completed = () => {
               )}
 
               {/* EMPTY */}
-              {!isLoading && tasks.length === 0 && (
+              {!isLoading && myCompletedTasks.length === 0 && (
                 <p className="text-gray-400 text-center mt-20">
-                  No completed tasks yet
+                  You haven't completed any tasks yet
                 </p>
               )}
 
               {/* TASK LIST */}
               <div className="space-y-2 pb-10">
-                {tasks.map(task => (
+                {myCompletedTasks.map(task => (
                   <div key={task.id}>
                     <div
                       onClick={() =>
